@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-    Create
+    Edit
 {% endblock %}
 
 
@@ -11,7 +11,7 @@
 {% endblock %}
 
 {% block body %}
-    <form action="{% url 'create' %}" method="post" class="create">
+    <form action="{% url 'e' %}" method="post" class="create">
         {% csrf_token %}
 
         <div class="form-group">

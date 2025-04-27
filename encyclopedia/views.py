@@ -1,7 +1,21 @@
 from django.shortcuts import render
+from django import forms
 
 from . import util
 
+class Entry(forms.Form):
+    title = forms.CharField(label="Title")
+    content = forms.CharField(label="Content", widget=forms.Textarea)
+
+    def clean_title(self):
+        title = self.cleaned_data.get('title')
+        entries = util.list_entries()
+
+        if any(existing.lower() == title.lower() for existing in entries):
+            raise forms.ValidationError(f"An entry with the title '{title}' already exists.")
+
+        return title
+    
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
@@ -38,8 +52,34 @@ def search(request):
         })
 
 def create(request):
-    return render(request, "encyclopedia/create.html")
+    if request.method == "POST":
+        form = Entry(request.POST)
+        if form.is_valid():
+            title = form.cleaned_data['title']
+            content = form.cleaned_data['content']
+            util.save_entry(title, content)
+            return render(request, "encyclopedia/entry.html", {
+                "name": title,
+                "content": content
+            })
+    else:
+        form = Entry()
 
-def add(request):
-    title = request.GET.get('title', '').strip()
-    content = request.GET.get('content', '').strip()
+    return render(request, "encyclopedia/create.html", {
+        "form": form
+    })
+
+def edit(request, name):
+    content = util.get_entry(name)
+    data = {
+        "title": name,
+        "content": content
+    }
+    entry = Entry(data)
+    return render(request, "encyclopedia/edit.html", {
+        "form": entry
+    })
+
+def e(request):
+    return render(request, "encyclopedia/edit.html")
+
