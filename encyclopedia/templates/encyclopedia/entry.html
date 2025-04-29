@@ -9,5 +9,5 @@
 
     <div> {{  content }}</div>
 
-    <a href="edit/{{name}}">Edit content</a>
+    <a href="{% url 'edit' name %}">Edit content</a>
 {% endblock %}

@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django import forms
 
 from . import util
@@ -70,15 +70,24 @@ def create(request):
     })
 
 def edit(request, name):
-    content = util.get_entry(name)
-    data = {
-        "title": name,
-        "content": content
-    }
-    entry = Entry(data)
-    return render(request, "encyclopedia/edit.html", {
-        "form": entry
-    })
+    if request.method == "POST":
+        form = Entry(request.POST)
+        title = form.data.get('title')
+        content = form.data.get('content')
+        util.save_entry(title, content)
+        return render(request, "encyclopedia/entry.html", {
+            "name": title,
+            "content": content
+        })
+    else:
+        content = util.get_entry(name)
+        form = Entry(initial={"title": name, "content": content})
+        form.fields['title'].widget.attrs['readonly'] = True
+
+        return render(request, "encyclopedia/edit.html", {
+            "form": form,
+            "title": name
+        })
 
 def e(request):
     return render(request, "encyclopedia/edit.html")
