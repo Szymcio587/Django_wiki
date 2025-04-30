@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django import forms
 import random as rand
+import markdown2
 
 from . import util
 
@@ -25,7 +26,8 @@ def index(request):
 
 def entry(request, name):
     if name in util.list_entries():
-        content = util.get_entry(name)
+        raw_content = util.get_entry(name)
+        content = markdown2.markdown(raw_content)
         return render(request, "encyclopedia/entry.html", {
             "name": name,
             "content": content
@@ -41,7 +43,8 @@ def search(request):
     print(f"Entries: {entries}")
     print(f"Prompt: {prompt}")
     if next((entry for entry in entries if entry.lower() == prompt.lower()), None):
-        content = util.get_entry(prompt)
+        raw_content = util.get_entry(prompt)
+        content = markdown2.markdown(raw_content)
         return render(request, "encyclopedia/entry.html", {
             "name": prompt,
             "content": content
@@ -57,7 +60,8 @@ def create(request):
         form = Entry(request.POST)
         if form.is_valid():
             title = form.cleaned_data['title']
-            content = form.cleaned_data['content']
+            raw_content = form.cleaned_data['content']
+            content = markdown2.markdown(raw_content)
             util.save_entry(title, content)
             return render(request, "encyclopedia/entry.html", {
                 "name": title,
@@ -74,7 +78,8 @@ def edit(request, name):
     if request.method == "POST":
         form = Entry(request.POST)
         title = form.data.get('title')
-        content = form.data.get('content')
+        raw_content = form.data.get('content')
+        content = markdown2.markdown(raw_content)
         util.save_entry(title, content)
         return render(request, "encyclopedia/entry.html", {
             "name": title,
@@ -93,7 +98,8 @@ def edit(request, name):
 def random(request):
     names = util.list_entries()
     name = rand.choice(names)
-    content = util.get_entry(name)
+    raw_content = util.get_entry(name)
+    content = markdown2.markdown(raw_content)
     return render(request, "encyclopedia/entry.html", {
         "name": name,
         "content": content
