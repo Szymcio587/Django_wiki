@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django import forms
+import random as rand
 
 from . import util
 
@@ -89,6 +90,12 @@ def edit(request, name):
             "title": name
         })
 
-def e(request):
-    return render(request, "encyclopedia/edit.html")
+def random(request):
+    names = util.list_entries()
+    name = rand.choice(names)
+    content = util.get_entry(name)
+    return render(request, "encyclopedia/entry.html", {
+        "name": name,
+        "content": content
+    })
 
